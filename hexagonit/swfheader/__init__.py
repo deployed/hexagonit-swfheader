@@ -23,7 +23,7 @@ def parse(input):
     header = {}
 
     # Read the 3-byte signature field
-    signature = ''.join(struct.unpack('<3c', input.read(3)))
+    signature = ''.join([x.decode() for x in struct.unpack('<3c', input.read(3))])
     if signature not in ('FWS', 'CWS'):
         raise ValueError('Invalid SWF signature: %s' % signature)
 
@@ -46,9 +46,9 @@ def parse(input):
 
     # The number of bits used to store the each of the RECT values are
     # stored in first five bits of the first byte.
-    nbits = read_ui8(buffer[0]) >> 3
+    nbits = read_ui8(buffer[:1]) >> 3
 
-    current_byte, buffer = read_ui8(buffer[0]), buffer[1:]
+    current_byte, buffer = read_ui8(buffer[:1]), buffer[1:]
     bit_cursor = 5
 
     for item in 'xmin', 'xmax', 'ymin', 'ymax':
@@ -62,7 +62,7 @@ def parse(input):
             if bit_cursor > 7:
                 # We've exhausted the current byte, consume the next one
                 # from the buffer.
-                current_byte, buffer = read_ui8(buffer[0]), buffer[1:]
+                current_byte, buffer = read_ui8(buffer[:1]), buffer[1:]
                 bit_cursor = 0
 
         # Convert value from TWIPS to a pixel value
